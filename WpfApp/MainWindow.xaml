@@ -1,0 +1,50 @@
+﻿<Window x:Class="WpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="500" Width="700">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Margin="5">
+            <Label>Выбранный файл:</Label>
+            <TextBlock
+                x:Name="FileNameBlock"
+                TextWrapping="Wrap"></TextBlock>
+            <Button
+                x:Name="ChooseFile"
+                Margin="5" Click="ChooseFile_Click"
+                >Выбрать файл</Button>
+            <StackPanel
+                x:Name="Language"
+                Orientation="Horizontal">
+                <Label>Язык</Label>
+                
+            </StackPanel>
+            <Label>Сейчас:</Label>
+            <TextBlock
+                x:Name="NowStatus"
+                TextWrapping="Wrap"></TextBlock>
+            <Label>Прогресс</Label>
+            <ProgressBar
+                x:Name="ProgressBar"
+                Height="20"></ProgressBar>
+            <Button
+                x:Name="Recognize"
+                Margin="5" Click="Recognize_Click"
+                >Распознать</Button>
+        </StackPanel>
+        <ScrollViewer Grid.Column="1" >
+            <TextBox
+            x:Name="TranslatedText"
+            TextWrapping="Wrap" 
+            AcceptsReturn="True"></TextBox>
+        </ScrollViewer>
+    </Grid>
+</Window>
