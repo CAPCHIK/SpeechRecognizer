@@ -7,7 +7,7 @@ namespace Shared
     {
         public GoogleService()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Path.Combine(Directory.GetCurrentDirectory(), "SpeechReconition-e15357d1cbb3.json"), EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Path.Combine(Directory.GetCurrentDirectory(), "SpeechReconition-58c4f44ebbbe.json"), EnvironmentVariableTarget.Process);
         }
     }
 }

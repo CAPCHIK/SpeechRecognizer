@@ -260,3 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 /Shared/SpeechReconition-e15357d1cbb3.json
+/WpfApp/SpeechReconition-58c4f44ebbbe.json
