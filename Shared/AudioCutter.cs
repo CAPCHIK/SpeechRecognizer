@@ -11,56 +11,36 @@ namespace Shared
 {
     public class AudioCutter
     {
-
-        public void TrimWavFile(string input, string output, TimeSpan start, TimeSpan end)
+        public async Task<(string fileName, int rate)> CompressAudio(Stream fileStream, Action<int> onProgress = null)
         {
-            using (var reader = WaveFormatConversionStream.CreatePcmStream(new Mp3FileReader(input)))
+            var outFormat = new WaveFormat(16000, 1);
+            var fileName = $"{Guid.NewGuid()}.wav";
+            using (var reader = new Mp3FileReader(fileStream))
+            using (var resampler = new MediaFoundationResampler(reader, outFormat) { ResamplerQuality = 60 })
+            using (var outStream = File.Create(fileName))
+            using (var writer = new WaveFileWriter(outStream, outFormat))
             {
-                using (WaveFileWriter writer = new WaveFileWriter(output, reader.WaveFormat))
+                var buffer = new byte[outFormat.AverageBytesPerSecond * 4];
+                var targetSize = outFormat.AverageBytesPerSecond * reader.TotalTime.TotalSeconds;
+                var readed = 0;
+                while (true)
                 {
-                    int segement = reader.WaveFormat.AverageBytesPerSecond / 1000;
-
-                    int startPosition = (int)start.TotalMilliseconds * segement;
-                    startPosition = startPosition - startPosition % reader.WaveFormat.BlockAlign;
-
-                    int endBytes = (int)end.TotalMilliseconds * segement;
-                    endBytes = endBytes - endBytes % reader.WaveFormat.BlockAlign;
-                    int endPosition = endBytes;
-                    Console.WriteLine($"{startPosition} {endPosition}");
-                    TrimWavFile(reader, writer, startPosition, endPosition);
-                }
-            }
-            using (var inputReader = new AudioFileReader(output))
-            {
-                // convert our stereo ISampleProvider to mono
-                var mono = new StereoToMonoSampleProvider(inputReader)
-                {
-                    LeftVolume = 0.0f, // discard the left channel
-                    RightVolume = 1.0f // keep the right channel
-                };
-
-                // ... OR ... could write the mono audio out to a WAV file
-                WaveFileWriter.CreateWaveFile16(output.Replace(".", "1."), mono);
-            }
-        }
-
-        private void TrimWavFile(WaveStream reader, WaveFileWriter writer, int startPosition, int endPosition)
-        {
-            reader.Position = startPosition;
-            byte[] buffer = new byte[1024];
-            while (reader.Position < endPosition)
-            {
-                int segment = (int)(endPosition - reader.Position);
-                if (segment > 0)
-                {
-                    int bytesToRead = Math.Min(segment, buffer.Length);
-                    int bytesRead = reader.Read(buffer, 0, bytesToRead);
-                    if (bytesRead > 0)
+                    int bytesRead = resampler.Read(buffer, 0, buffer.Length);
+                    readed += bytesRead;
+                    onProgress?.Invoke((int)(readed / targetSize * 100));
+                    if (bytesRead == 0)
                     {
-                        writer.Write(buffer, 0, bytesRead);
+                        // end of source provider
+                        break;
                     }
+                    // Write will throw exception if WAV file becomes too large
+                    await outStream.WriteAsync(buffer, 0, bytesRead);
                 }
             }
+            return (fileName, 16000);
         }
+
+
+
     }
 }
